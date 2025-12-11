@@ -6,9 +6,19 @@ btnChampions.onclick = async () => {
   try {
     const champions = await fetchChampions();
     champions.forEach((c) => {
+      const div = document.createElement("div");
+      div.id = `${c.id}div`;
+      ul.appendChild(div);
+
       const li = document.createElement("li");
       li.textContent = c.name;
-      ul.appendChild(li);
+      div.appendChild(li);
+
+      const btnDelete = document.createElement("button");
+      btnDelete.textContent = "X";
+      btnDelete.classList.add("deleteChamp");
+      btnDelete.id = `${c.id}del`;
+      div.appendChild(btnDelete);
     });
   } catch (error) {
     console.log(error);
@@ -28,5 +38,12 @@ const fetchChampions = async () => {
     return await response.json();
   } catch (error) {
     console.log("Error: " + error);
+  }
+};
+
+ul.onclick = (event) => {
+  if (event.target && event.target.matches("button.deleteChamp")) {
+    const divToRemove = document.getElementById(`${parseInt(event.target.id, 10)}div`);
+    divToRemove.remove();
   }
 };
