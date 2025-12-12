@@ -3,14 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="./script.js" defer></script>
     <link rel="stylesheet" href="./style.css" />
-    <title>Document</title>
+    <script src="./script.js" defer></script>
+    <title>Chess Champions List</title>
   </head>
   <body>
-    <div>
-        <button id="btnChampions">Get champions</button>
-        <ul id="champions"></ul>
+    <div class="container">
+      <h1>Chess Champions List</h1>
+
+      <div class="add-section">
+        <label for="newChampionsName">Name:</label>
+        <input type="text" id="newChampionsName" />
+        <label for="newChampionsYears">Years of Champions</label>
+        <input type="text" id="newChampionsYears" />
+        <label for="newChampionsPhoto">URL Photo:</label>
+        <input type="text" id="newChampionsPhoto" />
+
+        <button id="addChampionBtn">Add new champion</button>
+      </div>
+      <div id="championsDiv"></div>
     </div>
   </body>
 </html>

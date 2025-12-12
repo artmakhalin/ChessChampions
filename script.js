@@ -1,49 +1,46 @@
-const ul = document.getElementById("champions");
-const btnChampions = document.getElementById("btnChampions");
-console.log(btnChampions);
+const championsDiv = document.getElementById("championsDiv");
+const newChampionsName = document.getElementById("newChampionsName");
+const newChampionsYears = document.getElementById("newChampionsYears");
+const newChampionsPhoto = document.getElementById("newChampionsPhoto");
+const addChampionBtn = document.getElementById("addChampionBtn");
 
-btnChampions.onclick = async () => {
-  try {
-    const champions = await fetchChampions();
-    champions.forEach((c) => {
-      const div = document.createElement("div");
-      div.id = `${c.id}div`;
-      ul.appendChild(div);
+// console.log("" + (new Date().getTime() + Math.random()));
 
-      const li = document.createElement("li");
-      li.textContent = c.name;
-      div.appendChild(li);
-
-      const btnDelete = document.createElement("button");
-      btnDelete.textContent = "X";
-      btnDelete.classList.add("deleteChamp");
-      btnDelete.id = `${c.id}del`;
-      div.appendChild(btnDelete);
+fetch("https://6893186bc49d24bce8696873.mockapi.io/champions/champions")
+  .then((res) => res.json())
+  .then((champions) => {
+    console.log(champions);
+    
+    champions.forEach((champ) => {
+      displayOneCard(champ);
     });
-  } catch (error) {
-    console.log(error);
-  }
+  });
+
+addChampionBtn.onclick = () => {
+  fetch("https://6893186bc49d24bce8696873.mockapi.io/champions/champions", {
+    method: "POST",
+    body: JSON.stringify({
+      // id: "" + (new Date().getTime() + Math.random()),
+      name: newChampionsName.value.trim(),
+      yearsOfChampions: newChampionsYears.value.trim(),
+      photoUrl: newChampionsPhoto.value.trim(),
+    }),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+    },
+  })
+    .then((response) => response.json())
+    .then((champ) => {
+      displayOneCard(champ);
+    });
 };
 
-const fetchChampions = async () => {
-  try {
-    const response = await fetch(
-      "https://6893186bc49d24bce8696873.mockapi.io/champions/champions"
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.log("Error: " + error);
-  }
-};
-
-ul.onclick = (event) => {
-  if (event.target && event.target.matches("button.deleteChamp")) {
-    const divToRemove = document.getElementById(`${parseInt(event.target.id, 10)}div`);
-    divToRemove.remove();
-  }
+const displayOneCard = (champ) => {
+  championsDiv.innerHTML += `
+    <div class="champion-card">
+     <p><strong>Datum: </strong> ${champ.yearsOfChampions}</p>
+     <p><strong>Name:</strong> ${champ.name}</p>
+     <img src="${champ.photoUrl}" alt="Champion"/>
+    </div>`;
+    newChampionsName.value = newChampionsPhoto.value = newChampionsYears.value = "";
 };
