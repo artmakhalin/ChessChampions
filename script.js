@@ -1,26 +1,36 @@
+const API_URL =
+  "https://6893186bc49d24bce8696873.mockapi.io/champions/champions";
+
 const championsDiv = document.getElementById("championsDiv");
 const newChampionsName = document.getElementById("newChampionsName");
 const newChampionsYears = document.getElementById("newChampionsYears");
 const newChampionsPhoto = document.getElementById("newChampionsPhoto");
 const addChampionBtn = document.getElementById("addChampionBtn");
+const searchChampionsName = document.getElementById("searchChampionsName");
 
-// console.log("" + (new Date().getTime() + Math.random()));
+let championsCache = [];
 
-fetch("https://6893186bc49d24bce8696873.mockapi.io/champions/champions")
+fetch(API_URL)
   .then((res) => res.json())
-  .then((champions) => {
-    console.log(champions);
-
-    champions.forEach((champ) => {
-      displayOneCard(champ);
-    });
+  .then((data) => {
+    championsCache = data;
+    displayChampions(data);
   });
 
+searchChampionsName.oninput = () => {
+  championsDiv.innerHTML = "";
+
+  const filtered = championsCache.filter((champ) =>
+    champ.name.toLowerCase().startsWith(searchChampionsName.value.toLowerCase())
+  );
+
+  displayChampions(filtered);
+};
+
 addChampionBtn.onclick = () => {
-  fetch("https://6893186bc49d24bce8696873.mockapi.io/champions/champions", {
+  fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({
-      // id: "" + (new Date().getTime() + Math.random()),
       name: newChampionsName.value.trim(),
       yearsOfChampions: newChampionsYears.value.trim(),
       photoUrl: newChampionsPhoto.value.trim(),
@@ -33,6 +43,12 @@ addChampionBtn.onclick = () => {
     .then((champ) => {
       displayOneCard(champ);
     });
+};
+
+const displayChampions = (data) => {
+  data.forEach((champ) => {
+    displayOneCard(champ);
+  });
 };
 
 const displayOneCard = (champ) => {
@@ -57,13 +73,13 @@ const displayOneCard = (champ) => {
   const btnDelete = document.createElement("button");
   btnDelete.textContent = "X";
   btnDelete.classList.add("deleteChamp");
-  btnDelete.id = `${champ.id}del`;
+  btnDelete.dataset.id = champ.id;
   div.appendChild(btnDelete);
 
   const btnEdit = document.createElement("button");
   btnEdit.textContent = "Edit";
   btnEdit.classList.add("editChamp");
-  btnEdit.id = `${champ.id}edit`;
+  btnEdit.dataset.id = champ.id;
   div.appendChild(btnEdit);
 
   newChampionsName.value =
@@ -73,7 +89,7 @@ const displayOneCard = (champ) => {
 };
 
 championsDiv.onclick = (event) => {
-  const id = parseInt(event.target.id, 10);
+  const id = event.target.dataset.id;
   console.log(id);
 
   if (event.target && event.target.matches("button.editChamp")) {
@@ -107,42 +123,35 @@ championsDiv.onclick = (event) => {
     divToEdit.appendChild(btnSave);
 
     btnSave.onclick = () => {
-      fetch(
-        `https://6893186bc49d24bce8696873.mockapi.io/champions/champions/${id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            id: id,
-            name: inputName.value.trim(),
-            yearsOfChampions: inputDate.value.trim(),
-            photoUrl: inputImg.value.trim(),
-          }),
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-          },
-        }
-      )
+      fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          id: id,
+          name: inputName.value.trim(),
+          yearsOfChampions: inputDate.value.trim(),
+          photoUrl: inputImg.value.trim(),
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      })
         .then((response) => response.json())
         .then((champ) => {
-          divToEdit.style.display = "none";
+          divToEdit.remove();
           displayOneCard(champ);
         });
     };
   }
 
   if (event.target && event.target.matches("button.deleteChamp")) {
-    fetch(
-      `https://6893186bc49d24bce8696873.mockapi.io/champions/champions/${id}`,
-      {
-        method: "DELETE",
-      }
-    ).then((response) => {
+    fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    }).then((response) => {
       if (response.ok) {
+        const divToRemove = document.getElementById(`${id}div`);
+        divToRemove.remove();
+
         alert(`Champion with id ${id} removed`);
-        if (event.target && event.target.matches("button.deleteChamp")) {
-          const divToRemove = document.getElementById(`${id}div`);
-          divToRemove.remove();
-        }
       }
     });
   }
