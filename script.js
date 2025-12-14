@@ -10,12 +10,16 @@ const searchChampionsName = document.getElementById("searchChampionsName");
 
 let championsCache = [];
 
-fetch(API_URL)
-  .then((res) => res.json())
-  .then((data) => {
-    championsCache = data;
-    displayChampions(data);
-  });
+async function loadChampions() {
+  try {
+    championsCache = await request(API_URL);
+    displayChampions(championsCache);
+  } catch {
+    showError("Failed to load champions");
+  }
+}
+
+loadChampions();
 
 searchChampionsName.oninput = () => {
   const filtered = championsCache.filter((champ) =>
@@ -26,22 +30,24 @@ searchChampionsName.oninput = () => {
 };
 
 addChampionBtn.onclick = async () => {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      name: newChampionsName.value.trim(),
-      yearsOfChampions: newChampionsYears.value.trim(),
-      photoUrl: newChampionsPhoto.value.trim(),
-    }),
-    headers: {
-      "Content-type": "application/json; charset=UTF-8",
-    },
-  });
+  try {
+    const newChampion = await request(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        name: newChampionsName.value.trim(),
+        yearsOfChampions: newChampionsYears.value.trim(),
+        photoUrl: newChampionsPhoto.value.trim(),
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
 
-  const newChampion = await response.json();
-
-  championsCache.push(newChampion);
-  displayChampions(championsCache);
+    championsCache.push(newChampion);
+    displayChampions(championsCache);
+  } catch {
+    showError("Failed to add champion");
+  }
 };
 
 const displayChampions = (data) => {
@@ -70,17 +76,22 @@ const displayOneCard = (champ) => {
   img.alt = "Champion";
   div.appendChild(img);
 
+  const buttonsWrapper = document.createElement("div");
+  buttonsWrapper.classList.add("card-actions");
+  div.appendChild(buttonsWrapper);
+
   const btnDelete = document.createElement("button");
   btnDelete.textContent = "X";
   btnDelete.classList.add("deleteChamp");
   btnDelete.dataset.id = champ.id;
-  div.appendChild(btnDelete);
 
   const btnEdit = document.createElement("button");
   btnEdit.textContent = "Edit";
   btnEdit.classList.add("editChamp");
   btnEdit.dataset.id = champ.id;
-  div.appendChild(btnEdit);
+
+  buttonsWrapper.appendChild(btnEdit);
+  buttonsWrapper.appendChild(btnDelete);
 
   newChampionsName.value =
     newChampionsPhoto.value =
@@ -121,39 +132,63 @@ championsDiv.onclick = (event) => {
     btnSave.id = `${id}Save`;
     divToEdit.appendChild(btnSave);
 
-    btnSave.onclick = async () => {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          id: id,
-          name: inputName.value.trim(),
-          yearsOfChampions: inputDate.value.trim(),
-          photoUrl: inputImg.value.trim(),
-        }),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
+    btnSave.onclick = async () =>
+      await updateChampion(id, {
+        id: id,
+        name: inputName.value.trim(),
+        yearsOfChampions: inputDate.value.trim(),
+        photoUrl: inputImg.value.trim(),
       });
-
-      const updated = await response.json();
-
-      championsCache = championsCache.map((champ) =>
-        champ.id === id ? updated : champ
-      );
-      displayChampions(championsCache);
-    };
   }
 
   if (event.target && event.target.matches("button.deleteChamp")) {
-    fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
-    }).then((response) => {
-      if (response.ok) {
-        championsCache = championsCache.filter(champ => champ.id !== id);
-        displayChampions(championsCache);
-
-        alert(`Champion with id ${id} removed`);
-      }
-    });
+    deleteChampion(id);
   }
 };
+
+async function request(url, options = {}) {
+  try {
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API error:", error);
+    throw error;
+  }
+}
+
+async function updateChampion(id, data) {
+  try {
+    const updated = await request(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    championsCache = championsCache.map((ch) => (ch.id === id ? updated : ch));
+
+    displayChampions(championsCache);
+  } catch {
+    showError("Failed to update champion");
+  }
+}
+
+async function deleteChampion(id) {
+  try {
+    await request(`${API_URL}/${id}`, { method: "DELETE" });
+    alert(`Champion with id ${id} removed`);
+    championsCache = championsCache.filter((ch) => ch.id !== id);
+    displayChampions(championsCache);
+  } catch {
+    showError("Failed to delete champion");
+  }
+}
+
+function showError(message) {
+  alert(message);
+}
