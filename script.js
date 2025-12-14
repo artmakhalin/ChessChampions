@@ -18,8 +18,6 @@ fetch(API_URL)
   });
 
 searchChampionsName.oninput = () => {
-  championsDiv.innerHTML = "";
-
   const filtered = championsCache.filter((champ) =>
     champ.name.toLowerCase().startsWith(searchChampionsName.value.toLowerCase())
   );
@@ -27,8 +25,8 @@ searchChampionsName.oninput = () => {
   displayChampions(filtered);
 };
 
-addChampionBtn.onclick = () => {
-  fetch(API_URL, {
+addChampionBtn.onclick = async () => {
+  const response = await fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({
       name: newChampionsName.value.trim(),
@@ -38,14 +36,16 @@ addChampionBtn.onclick = () => {
     headers: {
       "Content-type": "application/json; charset=UTF-8",
     },
-  })
-    .then((response) => response.json())
-    .then((champ) => {
-      displayOneCard(champ);
-    });
+  });
+
+  const newChampion = await response.json();
+
+  championsCache.push(newChampion);
+  displayChampions(championsCache);
 };
 
 const displayChampions = (data) => {
+  championsDiv.innerHTML = "";
   data.forEach((champ) => {
     displayOneCard(champ);
   });
@@ -90,7 +90,6 @@ const displayOneCard = (champ) => {
 
 championsDiv.onclick = (event) => {
   const id = event.target.dataset.id;
-  console.log(id);
 
   if (event.target && event.target.matches("button.editChamp")) {
     const divToEdit = document.getElementById(`${id}div`);
@@ -122,8 +121,8 @@ championsDiv.onclick = (event) => {
     btnSave.id = `${id}Save`;
     divToEdit.appendChild(btnSave);
 
-    btnSave.onclick = () => {
-      fetch(`${API_URL}/${id}`, {
+    btnSave.onclick = async () => {
+      const response = await fetch(`${API_URL}/${id}`, {
         method: "PUT",
         body: JSON.stringify({
           id: id,
@@ -134,12 +133,14 @@ championsDiv.onclick = (event) => {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
-      })
-        .then((response) => response.json())
-        .then((champ) => {
-          divToEdit.remove();
-          displayOneCard(champ);
-        });
+      });
+
+      const updated = await response.json();
+
+      championsCache = championsCache.map((champ) =>
+        champ.id === id ? updated : champ
+      );
+      displayChampions(championsCache);
     };
   }
 
@@ -148,8 +149,8 @@ championsDiv.onclick = (event) => {
       method: "DELETE",
     }).then((response) => {
       if (response.ok) {
-        const divToRemove = document.getElementById(`${id}div`);
-        divToRemove.remove();
+        championsCache = championsCache.filter(champ => champ.id !== id);
+        displayChampions(championsCache);
 
         alert(`Champion with id ${id} removed`);
       }
