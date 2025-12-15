@@ -47,12 +47,12 @@ championsDiv.onclick = (event) => {
   const id = event.target.dataset.id;
   const oldChampion = championsCache.find((ch) => ch.id === id);
 
-  if (!oldChampion) {
-    showError("Champion not found");
-    return;
-  }
-
   if (event.target && event.target.matches("button.editChamp")) {
+    if (!oldChampion) {
+      showError("Champion not found");
+      return;
+    }
+
     const divToEdit = document.getElementById(`${id}div`);
     divToEdit.innerHTML = "";
 
@@ -169,7 +169,7 @@ function displayChampions(data) {
   data.forEach((champ) => {
     displayOneCard(champ);
   });
-};
+}
 
 function displayOneCard(champ) {
   const div = document.createElement("div");
@@ -206,7 +206,7 @@ function displayOneCard(champ) {
 
   buttonsWrapper.appendChild(btnEdit);
   buttonsWrapper.appendChild(btnDelete);
-};
+}
 
 //Helpers
 async function request(url, options = {}) {
@@ -246,4 +246,4 @@ function currentView() {
   return value
     ? championsCache.filter((ch) => ch.name.toLowerCase().startsWith(value))
     : championsCache;
-};
+}
