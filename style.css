@@ -4,10 +4,12 @@ body {
  margin: 0;
  padding: 20px;
 }
+
 .container {
- max-width: auto;
+ max-width: 1200px;
  margin: 0 auto;
 }
+
 h1 {
  text-align: center;
  color: #fff;
@@ -15,11 +17,13 @@ h1 {
  text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
  font-size: 50px;
 }
+
 #championsDiv {
  display: grid;
  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
  gap: 20px;
 }
+
 .champion-card {
  background: rgba(255, 255, 255, 0.9);
  border-radius: 12px;
@@ -30,15 +34,18 @@ h1 {
  text-align: center;
  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .champion-card:hover {
  transform: translateY(-5px);
  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
+
 .champion-card p {
  margin: 8px 0;
  font-size: 14px;
  color: #333;
 }
+
 .champion-card img {
  margin-top: 10px;
  width: 150px;
@@ -47,6 +54,7 @@ h1 {
  border: 3px solid #2771AE;
  box-shadow: 0 0 10px rgba(39,113,174,0.6);
 }
+
 .add-section {
     display: flex;
     justify-content: center;

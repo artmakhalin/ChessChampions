@@ -1,11 +1,11 @@
-♟ Chess Champions CRUD App
+## ♟ Chess Champions CRUD App
 
 A simple CRUD web application built with Vanilla JavaScript, HTML and CSS.
 The app allows you to view, search, add, edit and delete chess champions using a REST API.
 
 This project was created as a learning exercise with a strong focus on clean code, state management, and best practices without frameworks.
 
-🚀 Features
+## 🚀 Features
 
 📥 Load champions from REST API
 
@@ -23,7 +23,7 @@ This project was created as a learning exercise with a strong focus on clean cod
 
 🎨 Clean and modern UI
 
-🛠 Tech Stack
+## 🛠 Tech Stack
 
 HTML5 – semantic markup
 
