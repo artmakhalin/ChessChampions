@@ -18,9 +18,7 @@ let championsCache = [];
 loadChampions();
 
 //Events
-searchChampionName.oninput = () => {
-  displayChampions(currentView());
-};
+searchChampionName.oninput = debounce(() => displayChampions(currentView()));
 
 clearSearch.onclick = () => {
   searchChampionName.value = "";
@@ -246,4 +244,12 @@ function currentView() {
   return value
     ? championsCache.filter((ch) => ch.name.toLowerCase().startsWith(value))
     : championsCache;
+}
+
+function debounce(func, timeout = 1000) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  }
 }
