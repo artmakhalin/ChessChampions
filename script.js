@@ -43,60 +43,11 @@ addChampionBtn.onclick = async () => {
 
 championsDiv.onclick = (event) => {
   const id = event.target.dataset.id;
-  const oldChampion = championsCache.find((ch) => ch.id === id);
 
   if (event.target && event.target.matches("button.editChamp")) {
-    if (!oldChampion) {
-      showError("Champion not found");
-      return;
-    }
+    const divToEdit = event.target.parentElement;
 
-    const divToEdit = document.getElementById(`${id}div`);
-    divToEdit.innerHTML = "";
-
-    const inputName = document.createElement("input");
-    inputName.type = "text";
-    inputName.value = oldChampion.name;
-    divToEdit.appendChild(inputName);
-
-    const inputDate = document.createElement("input");
-    inputDate.type = "text";
-    inputDate.value = oldChampion.yearsOfChampions;
-    divToEdit.appendChild(inputDate);
-
-    const inputImg = document.createElement("input");
-    inputImg.type = "text";
-    inputImg.value = oldChampion.photoUrl;
-    divToEdit.appendChild(inputImg);
-
-    const btnSave = document.createElement("button");
-    btnSave.textContent = "Save";
-    btnSave.id = `${id}Save`;
-    divToEdit.appendChild(btnSave);
-
-    const btnCancel = document.createElement("button");
-    btnCancel.textContent = "Cancel";
-    divToEdit.appendChild(btnCancel);
-
-    btnSave.onclick = async () => {
-      const data = {
-        name: inputName.value.trim(),
-        yearsOfChampions: inputDate.value.trim(),
-        photoUrl: inputImg.value.trim(),
-      };
-      try {
-        validateChampion(data);
-        data.id = id;
-        await updateChampion(data);
-      } catch (error) {
-        showError(error.message);
-      }
-    };
-
-    btnCancel.onclick = () => {
-      divToEdit.remove();
-      displayOneCard(oldChampion);
-    };
+    displayEditCard(id, divToEdit);
   }
 
   if (event.target && event.target.matches("button.deleteChamp")) {
@@ -172,7 +123,7 @@ function displayChampions(data) {
 function displayOneCard(champ) {
   const div = document.createElement("div");
   div.classList.add("champion-card");
-  div.id = `${champ.id}div`;
+  div.dataset.id = champ.id;
   championsDiv.appendChild(div);
 
   const p = document.createElement("p");
@@ -204,6 +155,60 @@ function displayOneCard(champ) {
 
   buttonsWrapper.appendChild(btnEdit);
   buttonsWrapper.appendChild(btnDelete);
+}
+
+function displayEditCard(id, divToEdit) {
+  const oldChampion = championsCache.find((ch) => ch.id === id);
+  if (!oldChampion) {
+    showError("Champion not found");
+    return;
+  }
+
+  divToEdit.innerHTML = "";
+
+  const inputName = document.createElement("input");
+  inputName.type = "text";
+  inputName.value = oldChampion.name;
+  divToEdit.appendChild(inputName);
+
+  const inputDate = document.createElement("input");
+  inputDate.type = "text";
+  inputDate.value = oldChampion.yearsOfChampions;
+  divToEdit.appendChild(inputDate);
+
+  const inputImg = document.createElement("input");
+  inputImg.type = "text";
+  inputImg.value = oldChampion.photoUrl;
+  divToEdit.appendChild(inputImg);
+
+  const btnSave = document.createElement("button");
+  btnSave.textContent = "Save";
+  btnSave.dataset.id = id;
+  divToEdit.appendChild(btnSave);
+
+  const btnCancel = document.createElement("button");
+  btnCancel.textContent = "Cancel";
+  divToEdit.appendChild(btnCancel);
+
+  btnSave.onclick = async () => {
+    const data = {
+      name: inputName.value.trim(),
+      yearsOfChampions: inputDate.value.trim(),
+      photoUrl: inputImg.value.trim(),
+    };
+    try {
+      validateChampion(data);
+      data.id = id;
+      await updateChampion(data);
+    } catch (error) {
+      showError(error.message);
+    }
+  };
+
+  btnCancel.onclick = () => {
+    divToEdit.remove();
+    displayOneCard(oldChampion);
+  };
 }
 
 //Helpers
@@ -250,6 +255,8 @@ function debounce(func, timeout = 1000) {
   let timer;
   return (...args) => {
     clearTimeout(timer);
-    timer = setTimeout(() => { func.apply(this, args); }, timeout);
-  }
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
 }
