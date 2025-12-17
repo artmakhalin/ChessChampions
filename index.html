@@ -12,23 +12,30 @@
       <h1>Chess Champions List</h1>
 
       <div class="search-section">
-        <label for="searchChampionName">Search by name:</label>
-        <input
-          type="text"
-          id="searchChampionName"
-        />
-        <button id="clearSearch">Clear</button>
+        <div class="search-box search-box--inline">
+          <label for="searchChampionName">Search by name:</label>
+          <div class="search-input">
+            <input
+              type="text"
+              id="searchChampionName"
+              placeholder="Search..."
+            />
+            <button id="clearSearch">X</button>
+          </div>
+        </div>
       </div>
 
       <div class="add-section">
-        <label for="newChampionName">Name:</label>
-        <input type="text" id="newChampionName" />
-        <label for="newChampionYears">Years of Champions</label>
-        <input type="text" id="newChampionYears" />
-        <label for="newChampionPhoto">URL Photo:</label>
-        <input type="text" id="newChampionPhoto" />
+        <div class="form-card add-form">
+          <label for="newChampionName">Name:</label>
+          <input type="text" id="newChampionName" />
+          <label for="newChampionYears">Years of Champions</label>
+          <input type="text" id="newChampionYears" />
+          <label for="newChampionPhoto">URL Photo:</label>
+          <input type="text" id="newChampionPhoto" />
 
-        <button id="addChampionBtn">Add new champion</button>
+          <button id="addChampionBtn">Add new champion</button>
+        </div>
       </div>
       <div id="championsDiv"></div>
     </div>
