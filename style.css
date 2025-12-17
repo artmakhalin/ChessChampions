@@ -1,70 +1,74 @@
 body {
- font-family: Arial, sans-serif;
- background: linear-gradient(135deg, #89CFF0, #105D9C);
- margin: 0;
- padding: 20px;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #89cff0, #105d9c);
+  margin: 0;
+  padding: 20px;
 }
 
 .container {
- max-width: 1200px;
- margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 h1 {
- text-align: center;
- color: #fff;
- margin-bottom: 30px;
- text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
- font-size: 50px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 30px;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+  font-size: 50px;
 }
 
 #championsDiv {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
- gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  justify-items: center;
 }
 
 .champion-card {
- background: rgba(255, 255, 255, 0.9);
- border-radius: 12px;
- box-shadow: 0 4px 12px rgba(0,0,0,0.2);
- padding: 15px;
- margin: 30px auto;
- max-width: 400px;
- text-align: center;
- transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  margin: 30px auto;
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
 }
 
 .champion-card:hover {
- transform: translateY(-5px);
- box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .champion-card p {
- margin: 8px 0;
- font-size: 14px;
- color: #333;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
 }
 
 .champion-card img {
- margin-top: 10px;
- width: 150px;
- height: auto;
- border-radius: 20%;
- border: 3px solid #2771AE;
- box-shadow: 0 0 10px rgba(39,113,174,0.6);
+  margin-top: 10px;
+  width: 150px;
+  height: auto;
+  border-radius: 20%;
+  border: 3px solid #2771ae;
+  box-shadow: 0 0 10px rgba(39, 113, 174, 0.6);
 }
 
 .add-section {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
 }
 
 .search-section {
-    display: flex;
-    justify-content: center;
-    margin: 10px;
-    padding: 10px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  padding: 0 16px;
 }
 
 .card-actions {
@@ -99,4 +103,203 @@ h1 {
 
 .deleteChamp:hover {
   background-color: #c0392b;
+}
+
+/* .search-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+} */
+
+.search-box--inline {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 14px 16px;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.search-box--inline label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  text-align: right;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.search-input input:focus {
+  border-color: #2771ae;
+  box-shadow: 0 0 0 3px rgba(39, 113, 174, 0.25);
+}
+
+#clearSearch {
+  width: 36px;
+  height: 36px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s ease;
+}
+
+#clearSearch:hover {
+  background-color: #ddd;
+}
+
+.add-form {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 24px 26px;
+  border-radius: 16px;
+  width: 360px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.add-form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.add-form input {
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.add-form input:focus {
+  border-color: #2771ae;
+  box-shadow: 0 0 0 3px rgba(39, 113, 174, 0.25);
+}
+
+#addChampionBtn {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background-color: #2771ae;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#addChampionBtn:hover {
+  background-color: #1e5a8c;
+  transform: translateY(-1px);
+}
+
+#addChampionBtn:active {
+  transform: translateY(0);
+}
+
+input::placeholder {
+  color: #aaa;
+}
+
+.champion-card.edit-mode {
+  background: #f9fbff;
+  border: 2px solid #2771ae;
+  box-shadow: 0 8px 22px rgba(39, 113, 174, 0.25);
+  max-width: 350px;
+}
+
+.champion-card.edit-mode input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.champion-card.edit-mode input:focus {
+  border-color: #2771ae;
+  box-shadow: 0 0 0 2px rgba(39, 113, 174, 0.2);
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.edit-actions button {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-actions .save-btn {
+  background-color: #27ae60;
+  color: white;
+}
+
+.edit-actions .save-btn:hover {
+  background-color: #219150;
+}
+
+.edit-actions .cancel-btn {
+  background-color: #eee;
+  color: #333;
+}
+
+.edit-actions .cancel-btn:hover {
+  background-color: #ddd;
+}
+
+@media (max-width: 480px) {
+  .search-box--inline {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .search-box--inline label {
+    text-align: left;
+  }
 }

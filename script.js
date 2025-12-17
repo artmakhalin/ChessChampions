@@ -15,51 +15,57 @@ const clearSearch = document.getElementById("clearSearch");
 let championsCache = [];
 
 //Init
-loadChampions();
+init();
+
+function init() {
+  loadChampions();
+  bindEvents();
+}
 
 //Events
-searchChampionName.oninput = debounce(() => displayChampions(currentView()));
+function bindEvents() {
+  searchChampionName.oninput = debounce(() => renderChampions(currentView()));
 
-clearSearch.onclick = () => {
-  searchChampionName.value = "";
-  displayChampions(currentView());
-};
+  clearSearch.onclick = () => {
+    searchChampionName.value = "";
+    renderChampions(currentView());
+  };
 
-addChampionBtn.onclick = async () => {
-  try {
-    const data = {
-      name: newChampionName.value.trim(),
-      yearsOfChampions: newChampionYears.value.trim(),
-      photoUrl: newChampionPhoto.value.trim(),
-    };
+  addChampionBtn.onclick = async () => {
+    try {
+      const data = {
+        name: newChampionName.value.trim(),
+        yearsOfChampions: newChampionYears.value.trim(),
+        photoUrl: newChampionPhoto.value.trim(),
+      };
 
-    validateChampion(data);
-    await addChampion(data);
-    clearForm();
-  } catch (error) {
-    showError(error.message);
-  }
-};
+      validateChampion(data);
+      const champ = await addChampion(data);
+      alert(`Champion ${champ.name} added`);
+      clearForm();
+    } catch (error) {
+      showError(error.message);
+    }
+  };
 
-championsDiv.onclick = (event) => {
-  const id = event.target.dataset.id;
+  championsDiv.onclick = (event) => {
+    const id = event.target.dataset.id;
 
-  if (event.target && event.target.matches("button.editChamp")) {
-    const divToEdit = event.target.parentElement;
+    if (event.target && event.target.matches("button.editChamp")) {
+      renderEditChampionCard(id);
+    }
 
-    displayEditCard(id, divToEdit);
-  }
-
-  if (event.target && event.target.matches("button.deleteChamp")) {
-    deleteChampion(id);
-  }
-};
+    if (event.target && event.target.matches("button.deleteChamp")) {
+      deleteChampion(id);
+    }
+  };
+}
 
 //Business logic
 async function loadChampions() {
   try {
     championsCache = await request(API_URL);
-    displayChampions(championsCache);
+    renderChampions(championsCache);
   } catch (error) {
     showError("Failed to load champions");
   }
@@ -76,10 +82,11 @@ async function addChampion(data) {
     });
 
     championsCache.push(newChampion);
-    displayChampions(currentView());
-    alert(`Champion with id ${newChampion.id}`);
+    renderChampions(currentView());
+    return newChampion;
   } catch (error) {
     showError("Failed to add champion");
+    throw error;
   }
 }
 
@@ -95,7 +102,7 @@ async function updateChampion(data) {
       ch.id === data.id ? updated : ch
     );
 
-    displayChampions(currentView());
+    renderChampions(currentView());
   } catch (error) {
     showError("Failed to update champion");
   }
@@ -106,25 +113,25 @@ async function deleteChampion(id) {
     await request(`${API_URL}/${id}`, { method: "DELETE" });
     alert(`Champion with id ${id} removed`);
     championsCache = championsCache.filter((ch) => ch.id !== id);
-    displayChampions(currentView());
+    renderChampions(currentView());
   } catch (error) {
     showError("Failed to delete champion");
   }
 }
 
 //Render
-function displayChampions(data) {
+function renderChampions(data) {
   championsDiv.innerHTML = "";
   data.forEach((champ) => {
-    displayOneCard(champ);
+    championsDiv.appendChild(renderChampionCard(champ));
   });
 }
 
-function displayOneCard(champ) {
+function renderChampionCard(champ) {
   const div = document.createElement("div");
   div.classList.add("champion-card");
   div.dataset.id = champ.id;
-  championsDiv.appendChild(div);
+  div.id = `champion-${champ.id}`;
 
   const p = document.createElement("p");
   p.textContent = champ.name;
@@ -155,15 +162,22 @@ function displayOneCard(champ) {
 
   buttonsWrapper.appendChild(btnEdit);
   buttonsWrapper.appendChild(btnDelete);
+
+  return div;
 }
 
-function displayEditCard(id, divToEdit) {
+function renderEditChampionCard(id) {
+  closeActiveEdit();
+
   const oldChampion = championsCache.find((ch) => ch.id === id);
+
   if (!oldChampion) {
     showError("Champion not found");
     return;
   }
 
+  const divToEdit = document.getElementById(`champion-${id}`);
+  divToEdit.classList.add("edit-mode");
   divToEdit.innerHTML = "";
 
   const inputName = document.createElement("input");
@@ -181,14 +195,21 @@ function displayEditCard(id, divToEdit) {
   inputImg.value = oldChampion.photoUrl;
   divToEdit.appendChild(inputImg);
 
+  const actions = document.createElement("div");
+  actions.classList.add("edit-actions");
+  divToEdit.appendChild(actions);
+
   const btnSave = document.createElement("button");
   btnSave.textContent = "Save";
   btnSave.dataset.id = id;
-  divToEdit.appendChild(btnSave);
+  btnSave.classList.add("save-btn");
 
   const btnCancel = document.createElement("button");
   btnCancel.textContent = "Cancel";
-  divToEdit.appendChild(btnCancel);
+  btnCancel.classList.add("cancel-btn");
+
+  actions.appendChild(btnSave);
+  actions.appendChild(btnCancel);
 
   btnSave.onclick = async () => {
     const data = {
@@ -206,8 +227,8 @@ function displayEditCard(id, divToEdit) {
   };
 
   btnCancel.onclick = () => {
-    divToEdit.remove();
-    displayOneCard(oldChampion);
+    divToEdit.classList.remove("edit-mode");
+    divToEdit.replaceWith(renderChampionCard(oldChampion));
   };
 }
 
@@ -251,12 +272,30 @@ function currentView() {
     : championsCache;
 }
 
-function debounce(func, timeout = 1000) {
+function debounce(func, timeout = 500) {
   let timer;
   return (...args) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      func.apply(this, args);
+      func(...args);
     }, timeout);
   };
+}
+
+function closeActiveEdit() {
+  const activeEditCard = document.querySelector(".champion-card.edit-mode");
+
+  if (!activeEditCard) return;
+
+  if (activeEditCard) {
+    const confirmClose = confirm("Discard changes?");
+    if (!confirmClose) return;
+  }
+
+  const id = activeEditCard.dataset.id;
+  const champion = championsCache.find((ch) => ch.id === id);
+
+  if (!champion) return;
+
+  activeEditCard.replaceWith(renderChampionCard(champion));
 }
