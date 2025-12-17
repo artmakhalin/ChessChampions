@@ -34,12 +34,15 @@ This repository represents the **current polished version** of the app after ite
 * **MockAPI** – REST backend
 
 ## 📂 Project Structure
+
+```text
 project/
 │
 ├── index.html      # Markup
 ├── style.css       # Styles & layout
 ├── script.js       # Application logic
 └── README.md       # Documentation
+```
 
 ## 🧠 Architecture Overview
 ### Single Source of Truth
