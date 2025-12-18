@@ -1,6 +1,7 @@
 //Config
 const API_URL =
   "https://6893186bc49d24bce8696873.mockapi.io/champions/champions";
+const PAGE_SIZE = 10;
 
 //DOM
 const championsDiv = document.getElementById("championsDiv");
@@ -10,9 +11,16 @@ const newChampionPhoto = document.getElementById("newChampionPhoto");
 const addChampionBtn = document.getElementById("addChampionBtn");
 const searchChampionName = document.getElementById("searchChampionName");
 const clearSearch = document.getElementById("clearSearch");
+const paginationUl = document.querySelector(".pagination");
+const prev = document.getElementById("prev");
+const next = document.getElementById("next");
 
 //State
 let championsCache = [];
+const state = {
+  page: 0,
+  pageSize: PAGE_SIZE,
+};
 
 //Init
 init();
@@ -24,11 +32,14 @@ function init() {
 
 //Events
 function bindEvents() {
-  searchChampionName.oninput = debounce(() => renderChampions(currentView()));
+  searchChampionName.oninput = debounce(() => {
+    state.page = 0;
+    renderChampions(currentView(), state.page * state.pageSize);
+  });
 
   clearSearch.onclick = () => {
     searchChampionName.value = "";
-    renderChampions(currentView());
+    renderChampions(currentView(), state.page * state.pageSize);
   };
 
   addChampionBtn.onclick = async () => {
@@ -59,13 +70,28 @@ function bindEvents() {
       deleteChampion(id);
     }
   };
+
+  prev.onclick = () => {
+    if (state.page > 0) {
+      state.page--;
+      renderChampions(currentView(), state.page * state.pageSize);
+    }
+  };
+
+  next.onclick = () => {
+    const pageCount = Math.ceil(currentView().length / state.pageSize) - 1;
+    if (state.page < pageCount) {
+      state.page++;
+      renderChampions(currentView(), state.page * state.pageSize);
+    }
+  };
 }
 
 //Business logic
 async function loadChampions() {
   try {
     championsCache = await request(API_URL);
-    renderChampions(championsCache);
+    renderChampions(championsCache, state.page * state.pageSize);
   } catch (error) {
     showError("Failed to load champions");
   }
@@ -82,7 +108,7 @@ async function addChampion(data) {
     });
 
     championsCache.push(newChampion);
-    renderChampions(currentView());
+    renderChampions(currentView(), state.page * state.pageSize);
     return newChampion;
   } catch (error) {
     showError("Failed to add champion");
@@ -102,7 +128,7 @@ async function updateChampion(data) {
       ch.id === data.id ? updated : ch
     );
 
-    renderChampions(currentView());
+    renderChampions(currentView(), state.page * state.pageSize);
   } catch (error) {
     showError("Failed to update champion");
   }
@@ -113,18 +139,22 @@ async function deleteChampion(id) {
     await request(`${API_URL}/${id}`, { method: "DELETE" });
     alert(`Champion with id ${id} removed`);
     championsCache = championsCache.filter((ch) => ch.id !== id);
-    renderChampions(currentView());
+    renderChampions(currentView(), state.page * state.pageSize);
   } catch (error) {
     showError("Failed to delete champion");
   }
 }
 
 //Render
-function renderChampions(data) {
+function renderChampions(data, start) {
   championsDiv.innerHTML = "";
-  data.forEach((champ) => {
-    championsDiv.appendChild(renderChampionCard(champ));
-  });
+  clearPaginationLinks();
+
+  for (let i = start; i < Math.min(start + state.pageSize, data.length); i++) {
+    championsDiv.appendChild(renderChampionCard(data[i]));
+  }
+
+  renderPaginationLinks(data, state.page);
 }
 
 function renderChampionCard(champ) {
@@ -167,7 +197,9 @@ function renderChampionCard(champ) {
 }
 
 function renderEditChampionCard(id) {
-  closeActiveEdit();
+  if (!closeActiveEdit()) {
+    return;
+  }
 
   const oldChampion = championsCache.find((ch) => ch.id === id);
 
@@ -232,6 +264,33 @@ function renderEditChampionCard(id) {
   };
 }
 
+function renderPaginationLinks(data, currentPage) {
+  const fragment = document.createDocumentFragment();
+  const pageCount = Math.ceil(data.length / state.pageSize);
+
+  for (let i = 0; i < pageCount; i++) {
+    const currLi = document.createElement("li");
+    currLi.classList.add("page-item");
+    currLi.classList.add("custom-page");
+    if (i === currentPage) {
+      currLi.classList.add("active");
+    }
+
+    const link = document.createElement("a");
+    link.classList.add("page-link");
+    link.textContent = i + 1;
+    link.onclick = () => {
+      state.page = i;
+      renderChampions(data, i * state.pageSize);
+    };
+
+    currLi.append(link);
+    fragment.appendChild(currLi);
+  }
+
+  paginationUl.insertBefore(fragment, next);
+}
+
 //Helpers
 async function request(url, options = {}) {
   try {
@@ -265,6 +324,11 @@ function clearForm() {
   newChampionYears.value = "";
 }
 
+function clearPaginationLinks() {
+  const customPages = document.querySelectorAll(".custom-page");
+  customPages.forEach((element) => element.remove());
+}
+
 function currentView() {
   const value = searchChampionName.value.trim().toLowerCase();
   return value
@@ -285,17 +349,19 @@ function debounce(func, timeout = 500) {
 function closeActiveEdit() {
   const activeEditCard = document.querySelector(".champion-card.edit-mode");
 
-  if (!activeEditCard) return;
+  if (!activeEditCard) return true;
 
   if (activeEditCard) {
     const confirmClose = confirm("Discard changes?");
-    if (!confirmClose) return;
+    if (!confirmClose) return false;
   }
 
   const id = activeEditCard.dataset.id;
   const champion = championsCache.find((ch) => ch.id === id);
 
-  if (!champion) return;
+  if (!champion) return true;
 
   activeEditCard.replaceWith(renderChampionCard(champion));
+
+  return true;
 }

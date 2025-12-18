@@ -13,9 +13,15 @@ This repository represents the **current polished version** of the app after ite
 
 ➕ Add a new champion
 
-✏️ Edit champion inline (single active edit mode)
+✏️ Inline edit with single active edit mode
 
 🗑 Delete champion
+
+📄 Client-side pagination
+
+◀️▶️ Prev / Next navigation
+
+🎯 Active page highlighting
 
 ⚡ Single Source of Truth (local cache)
 
@@ -28,6 +34,8 @@ This repository represents the **current polished version** of the app after ite
 * **HTML5** – semantic markup
 
 * **CSS3** – modern layout, flexbox & grid
+
+* **Bootstrap** - used for Pagination only
 
 * **JavaScript (ES6+)** – vanilla JS, no frameworks
 
@@ -47,10 +55,14 @@ project/
 ## 🧠 Architecture Overview
 ### Single Source of Truth
 
-All application data is stored in a single state variable:
+The application uses explicit UI state to manage pagination and rendering:
 
 ```javascript
     let championsCache = [];
+    const state = {
+        page: 0,
+        pageSize: 10,
+    };
 ```
 
 The UI is always rendered from this state.
@@ -85,7 +97,8 @@ This approach ensures:
 
 ```javascript
     searchChampionName.oninput = debounce(() =>
-        renderChampions(currentView())
+        state.page = 0;
+        renderChampions(currentView(), state.page * state.pageSize);
     );
 ```
 
@@ -103,25 +116,55 @@ Filtering is derived from state:
 
 * Only one card can be edited at a time
 
-* Opening a new edit closes the previous one
+* Opening a new edit automatically closes the previous one
 
-* Edit state is fully controlled by re-rendering from state
+* User confirmation is required to discard changes
+
+* Edit mode is fully restored from state, not DOM patches
+
 ```javascript
     function closeActiveEdit() {
-    const activeEditCard = document.querySelector('.champion-card.edit-mode');
-    if (!activeEditCard) return;
+        const activeEditCard = document.querySelector(".champion-card.edit-mode");
 
+        if (!activeEditCard) return true;
 
-    const id = activeEditCard.dataset.id;
-    const champion = championsCache.find(ch => ch.id === id);
-    if (!champion) return;
+        if (activeEditCard) {
+            const confirmClose = confirm("Discard changes?");
+            if (!confirmClose) return false;
+        }
 
+        const id = activeEditCard.dataset.id;
+        const champion = championsCache.find((ch) => ch.id === id);
 
-    activeEditCard.replaceWith(renderChampionCard(champion));
+        if (!champion) return true;
+
+        activeEditCard.replaceWith(renderChampionCard(champion));
+
+        return true;
     }
 ```
 
 This avoids DOM inconsistencies and visual glitches.
+
+### 📄 Pagination Logic
+
+Pagination is implemented entirely on the client side and works together
+with filtering and search.
+
+* Pagination state is stored centrally
+* No additional API requests are made
+* Pagination automatically adapts to filtered results
+
+### Render Flow
+State
+   ↓
+Filtered View
+   ↓
+Paginated Slice
+   ↓
+Render UI
+
+Changing search input resets the current page to avoid empty views.
 
 ### 🎨 UI & Styling Principles
 
@@ -136,6 +179,18 @@ This avoids DOM inconsistencies and visual glitches.
 * No inline styles
 
 Search and Add forms share the same visual structure for consistency.
+
+## 🎨 UX Decisions
+
+* Search input uses debounce to avoid unnecessary re-renders
+
+* Pagination resets on filtering to prevent empty pages
+
+* Active pagination page is highlighted
+
+* Forms share consistent layout and spacing
+
+* Confirmation dialogs prevent accidental data loss
 
 ### ⚠️ Error Handling
 
